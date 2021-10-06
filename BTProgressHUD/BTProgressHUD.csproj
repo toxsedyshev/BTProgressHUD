@@ -5,6 +5,7 @@
     <RootNamespace>BTProgressHUD</RootNamespace>
     <PackageId>BTProgressHUD</PackageId>
     <Description>SVProgressHUD (and BTProgressHUD) is a clean and easy-to-use HUD meant to display the progress of an ongoing task.</Description>
+    <Nullable>enable</Nullable>
   </PropertyGroup>
 
   <ItemGroup>

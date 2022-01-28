@@ -740,56 +740,97 @@ namespace BigTed
 
         void DismissWorker()
         {
+            try
+            {
+                DismissWorkerUnsafe();
+            }
+            catch (Exception ex)
+            {
+                OnError(ex);
+            }
+        }
+
+        void DismissWorkerUnsafe()
+        {
             SetFadeoutTimer(null);
             SetProgressTimer(null);
 
             UIView.Animate(0.3, 0, UIViewAnimationOptions.CurveEaseIn | UIViewAnimationOptions.AllowUserInteraction,
                 delegate
                 {
-                    HudView.Transform.Scale(0.8f, 0.8f);
-                    if (isClear)
+                    try
                     {
-                        HudView.Alpha = 0f;
+                        HudView.Transform.Scale(0.8f, 0.8f);
+                        if (isClear)
+                        {
+                            HudView.Alpha = 0f;
+                        }
+                        else
+                        {
+                            Alpha = 0f;
+                        }
                     }
-                    else
+                    catch (Exception ex)
                     {
-                        Alpha = 0f;
+                        OnError(ex);
                     }
                 }, delegate
                 {
-                    if (Alpha == 0f || HudView.Alpha == 0f)
+                    try
                     {
+                        if (Alpha != 0f && HudView?.Alpha != 0f)
+                        {
+                            return;
+                        }
                         InvokeOnMainThread(delegate
                         {
-                            Alpha = 0f;
-                            HudView.Alpha = 0f;
+                            try
+                            {
+                                Alpha = 0f;
+                                HudView.Alpha = 0f;
 
-                            //Removing observers
-                            UnRegisterNotifications();
-                            NSNotificationCenter.DefaultCenter.RemoveObserver(this);
+                                //Removing observers
+                                UnRegisterNotifications();
+                                NSNotificationCenter.DefaultCenter.RemoveObserver(this);
 
-                            Ring.ResetStyle(TintColor);
+                                Ring.ResetStyle(TintColor);
 
-                            CancelRingLayerAnimation();
-                            StringLabel.RemoveFromSuperview();
-                            SpinnerView.RemoveFromSuperview();
-                            ImageView.RemoveFromSuperview();
-                            if (_cancelHud != null)
-                                _cancelHud.RemoveFromSuperview();
+                                CancelRingLayerAnimation();
+                            }
+                            catch (Exception ex)
+                            {
+                                OnError(ex);
+                            }
 
-                            StringLabel = null;
-                            SpinnerView = null;
-                            ImageView = null;
-                            _cancelHud = null;
+                            try
+                            {
+                                StringLabel?.RemoveFromSuperview();
+                                SpinnerView?.RemoveFromSuperview();
+                                ImageView?.RemoveFromSuperview();
+                                _cancelHud?.RemoveFromSuperview();
 
-                            HudView.RemoveFromSuperview();
-                            HudView = null;
-                            OverlayView.RemoveFromSuperview();
-                            OverlayView = null;
-                            this.RemoveFromSuperview();
+                                StringLabel = null;
+                                SpinnerView = null;
+                                ImageView = null;
+                                _cancelHud = null;
 
-                            GetActiveWindow()?.RootViewController?.SetNeedsStatusBarAppearanceUpdate();
+                                HudView?.RemoveFromSuperview();
+                                HudView = null;
+                                OverlayView?.RemoveFromSuperview();
+                                OverlayView = null;
+                                RemoveFromSuperview();
+
+                                GetActiveWindow()?.RootViewController?.SetNeedsStatusBarAppearanceUpdate();
+                            }
+                            catch (Exception ex)
+                            {
+                                OnError(ex);
+                            }
                         });
+                    }
+                    catch (Exception ex)
+                    {
+                        OnError(ex);
                     }
                 });
         }
@@ -837,9 +878,39 @@ namespace BigTed
 
         ToastPosition toastPosition = ToastPosition.Center;
 
+        public event Action<Exception> Error;
+
+        void OnError(Exception ex)
+        {
+            try
+            {
+#if DEBUG
+                Console.WriteLine($"BTProgressHUD: {ex.Message}\n\n{ex.StackTrace}");
+#endif
+                Error?.Invoke(ex);
+            }
+            catch (Exception e)
+            {
+#if DEBUG
+                Console.WriteLine($"BTProgressHUD.OnError: {e.Message}\n\n{e.StackTrace}");
+#endif
+            }
+        }
+
         void PositionHUD(NSNotification notification)
         {
+            try
+            {
+                PositionHUDUnsafe(notification);
+            }
+            catch (Exception ex)
+            {
+                OnError(ex);
+            }
+        }
 
+        void PositionHUDUnsafe(NSNotification notification)
+        { 
             nfloat keyboardHeight = 0;
             double animationDuration = 0;
 

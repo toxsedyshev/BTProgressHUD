@@ -585,9 +585,19 @@ namespace BigTed
             {
                 if (_hudView == null)
                 {
-                    _hudView = new UIToolbar();
-                    ((UIToolbar)_hudView).Translucent = true;
-                    ((UIToolbar)_hudView).BarTintColor = HudBackgroundColour;
+                    var toolbar = new UIToolbar();
+                    _hudView = toolbar;
+
+                    if (UIDevice.CurrentDevice.CheckSystemVersion(13, 0))
+                    {
+                        var appearanceTB = new UIToolbarAppearance();
+                        appearanceTB.ConfigureWithOpaqueBackground();
+                        appearanceTB.BackgroundColor = HudBackgroundColour;
+                        toolbar.StandardAppearance = appearanceTB;
+                    }
+
+                    toolbar.Translucent = true;
+                    toolbar.BarTintColor = HudBackgroundColour;
                     _hudView.Layer.CornerRadius = 10;
                     _hudView.Layer.MasksToBounds = true;
                     _hudView.BackgroundColor = HudBackgroundColour;
@@ -596,8 +606,7 @@ namespace BigTed
 
                     AddSubview(_hudView);
 
-                    if (_hudView is UIToolbar)
-                        _hudView.LayoutIfNeeded();
+                    _hudView?.LayoutIfNeeded();
                 }
                 return _hudView;
             }
